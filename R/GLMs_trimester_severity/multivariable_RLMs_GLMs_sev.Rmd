@@ -1,0 +1,441 @@
+---
+title: "Univariable models"
+author: "Mathilde Le Vu"
+date: "2024-03-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Gestational age 
+```{r}
+  m_GA_multiv_sev<- rlm(GA_weeks_corrected ~ Grippe_severity3+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, data=flu_cases_during_pregn_pandemy_sev_livebirths)
+   summary(m_GA_multiv_sev)
+   nobs(m_GA_multiv_sev)
+```
+
+## Table
+```{r}
+GA_GLM3 <- round(head(estimates_cont_rlm(m_GA_multiv_sev),16), 2)
+
+  GA_GLM3['Parameters'] <- c("intercept", 
+                            "Flu severity (ref: no flu)", "","Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  GA_GLM3['category'] <- c(" ",
+                          "mild", "severe", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  GA_GLM3<-GA_GLM3[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_GA_gt <- GA_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,958")
+    M_GA_gt
+    
+M_GA_gt%>%
+  gtsave(here("output/tables/models_flu_trimester_or_severity/severity/multivariable/rlm", "M_GA_severity_multiv.docx"))
+```
+## Marginally adjusted means
+```{r}
+m_GA_a_mmeans_multiv <- ggemmeans(m_GA_multiv_sev, "Grippe_severity3")
+m_GA_a_mmeans_multiv <- mmeans_ci_vertic_cont(m_GA_a_mmeans_multiv) 
+
+ m_GA_a_mmeans_multiv['outcome'] <- c("gestational age (weeks)")
+   m_GA_a_mmeans_multiv['severity'] <- c("no", "mild", "severe")
+
+ m_GA_a_mmeans_multiv<-m_GA_a_mmeans_multiv[, c("outcome",'severity', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# Birthweight 
+```{r}
+  m_BW_multiv_sev<- rlm(birthweight ~ Grippe_severity3+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, data=flu_cases_during_pregn_pandemy_sev_livebirths)
+   summary(m_BW_multiv_sev)
+   nobs(m_BW_multiv_sev)
+```
+
+### Table
+```{r}
+BW_GLM3 <- round(head(estimates_cont_rlm(m_BW_multiv_sev),16), 2)
+
+  BW_GLM3['Parameters'] <- c("intercept", 
+                            "Flu severity (ref: no flu)", "","Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  BW_GLM3['category'] <- c(" ",
+                          "mild", "severe", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  BW_GLM3<-BW_GLM3[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_BW_gt <- BW_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,958")
+    M_BW_gt
+    
+M_BW_gt%>%
+    gtsave(here("output/tables/models_flu_trimester_or_severity/severity/multivariable/rlm", "M_BW_severity_multiv.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_BW_a_mmeans_multiv <- ggemmeans(m_BW_multiv_sev, "Grippe_severity3")
+m_BW_a_mmeans_multiv <- mmeans_ci_vertic_cont(m_BW_a_mmeans_multiv) 
+
+ m_BW_a_mmeans_multiv['outcome'] <- c("birth weight (g)")
+  m_BW_a_mmeans_multiv['severity'] <- c("no", "mild", "severe")
+  m_BW_a_mmeans_multiv<-m_BW_a_mmeans_multiv[, c("outcome",'severity', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# Head circumference 
+```{r}
+   m_HC_multiv_sev<- rlm(head_circ ~ Grippe_severity3+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, data=flu_cases_during_pregn_pandemy_sev_livebirths)
+   summary(m_HC_multiv_sev)
+   nobs(m_HC_multiv_sev)
+```
+
+## Table
+```{r}
+HC_GLM3 <- round(head(estimates_cont_rlm(m_HC_multiv_sev),16), 2)
+
+  HC_GLM3['Parameters'] <- c("intercept", 
+                            "Flu severity (ref: no flu)", "",  "Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  HC_GLM3['category'] <- c(" ",
+                          "mild", "severe", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  HC_GLM3 <- HC_GLM3[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_HC_gt <- HC_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,951")
+    M_HC_gt
+    
+M_HC_gt%>%
+   gtsave(here("output/tables/models_flu_trimester_or_severity/severity/multivariable/rlm", "M_HC_severity_multiv.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_HC_a_mmeans_multiv <- ggemmeans(m_HC_multiv_sev, "Grippe_severity3")
+m_HC_a_mmeans_multiv <- mmeans_ci_vertic_cont(m_HC_a_mmeans_multiv) 
+
+ m_HC_a_mmeans_multiv['outcome'] <- c("head circumference (cm)")
+ m_HC_a_mmeans_multiv['severity'] <- c("no", "mild", "severe")
+  m_HC_a_mmeans_multiv<-m_HC_a_mmeans_multiv[, c("outcome",'severity', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# Placenta weight 
+```{r}
+ m_PW_multiv_sev<- rlm(placentaweight ~ Grippe_severity3+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, data=flu_cases_during_pregn_pandemy_sev_livebirths)
+   summary(m_PW_multiv_sev)
+   nobs(m_PW_multiv_sev)
+```
+
+## Table
+```{r}
+PW_GLM3 <- round(head(estimates_cont_rlm(m_PW_multiv_sev),16), 2)
+
+  PW_GLM3['Parameters'] <- c("intercept", 
+                            "Flu severity (ref: no flu)", "", "Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  PW_GLM3['category'] <- c(" ",
+                          "mild", "severe", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  PW_GLM3 <- PW_GLM3[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_PW_gt <- PW_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,936")
+    M_PW_gt
+    
+M_PW_gt%>%
+   gtsave(here("output/tables/models_flu_trimester_or_severity/severity/multivariable/rlm", "M_PW_severity_multiv.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_PW_a_mmeans_multiv <- ggemmeans(m_PW_multiv_sev, "Grippe_severity3")
+m_PW_a_mmeans_multiv <- mmeans_ci_vertic_cont(m_PW_a_mmeans_multiv) 
+
+ m_PW_a_mmeans_multiv['outcome'] <- c("placenta weight (g)")
+  m_PW_a_mmeans_multiv['severity'] <- c("no", "mild", "severe")
+  m_PW_a_mmeans_multiv<-m_PW_a_mmeans_multiv[, c("outcome",'severity', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# Birth length 
+```{r}
+  m_BL_multiv_sev<- rlm(babylength ~ Grippe_severity3+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, data=flu_cases_during_pregn_pandemy_sev_livebirths)
+   summary(m_BL_multiv_sev)
+   nobs(m_BL_multiv_sev)
+```
+
+## Table
+```{r}
+BL_GLM3 <- round(head(estimates_cont_rlm(m_BL_multiv_sev),16), 2)
+
+  BL_GLM3['Parameters'] <- c("intercept", 
+                            "Flu severity (ref: no flu)", "", "Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  BL_GLM3['category'] <- c(" ",
+                          "mild", "severe", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  BL_GLM3 <- BL_GLM3[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_BL_gt <- BL_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,956")
+    M_BL_gt
+    
+M_BL_gt%>%
+    gtsave(here("output/tables/models_flu_trimester_or_severity/severity/multivariable/rlm", "M_BL_severity_multiv.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_BL_a_mmeans_multiv <- ggemmeans(m_BL_multiv_sev, "Grippe_severity3")
+m_BL_a_mmeans_multiv <- mmeans_ci_vertic_cont(m_BL_a_mmeans_multiv) 
+
+ m_BL_a_mmeans_multiv['outcome'] <- c("birth length (cm)")
+    m_BL_a_mmeans_multiv['severity'] <- c("no", "mild", "severe")
+ m_BL_a_mmeans_multiv<-m_BL_a_mmeans_multiv[, c("outcome",'severity', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+## PI 
+```{r}
+  m_PI_multiv_sev<- rlm(PI ~ Grippe_severity3+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, data=flu_cases_during_pregn_pandemy_sev_livebirths)
+   summary(m_PI_multiv_sev)
+   nobs(m_PI_multiv_sev)
+```
+
+## Table
+```{r}
+PI_GLM3 <- round(head(estimates_cont_rlm(m_PI_multiv_sev),16), 2)
+
+  PI_GLM3['Parameters'] <- c("intercept", 
+                            "Flu severity (ref: no flu)", "",  "Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  PI_GLM3['category'] <- c(" ",
+                          "mild", "severe", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  PI_GLM3 <- PI_GLM3[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_PI_gt <- PI_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,956")
+    M_PI_gt
+    
+M_PI_gt%>%
+   gtsave(here("output/tables/models_flu_trimester_or_severity/severity/multivariable/rlm", "M_PI_severity_multiv.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_PI_a_mmeans_multiv <- ggemmeans(m_PI_multiv_sev, "Grippe_severity3")
+m_PI_a_mmeans_multiv <- mmeans_ci_vertic_cont(m_PI_a_mmeans_multiv) 
+
+ m_PI_a_mmeans_multiv['outcome'] <- c("ponderal index")
+     m_PI_a_mmeans_multiv['severity'] <- c("no", "mild", "severe")
+  m_PI_a_mmeans_multiv<-m_PI_a_mmeans_multiv[, c("outcome",'severity', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# Pooling the tables for predicted means together
+```{r}
+a_m_cont_outc_u_multiv_sev <- rbind(m_BW_a_mmeans_multiv,m_HC_a_mmeans_multiv,
+                                m_PW_a_mmeans_multiv, m_BL_a_mmeans_multiv,
+                                m_PI_a_mmeans_multiv, m_GA_a_mmeans_multiv)
+a_m_cont_outc_u_multiv_sev <- a_m_cont_outc_u_multiv_sev %>%
+  mutate(sex="all",
+         model="multivariable")
+a_m_cont_outc_u_multiv_sev%>%
+  gt() %>%
+  gtsave(here("output/tables/models_flu_trimester_or_severity/severity/multivariable/rlm", "M_cont_estimates_Flu_severity_multiv_rlm_gt.docx"))
+```
+
+
+# LBW 
+```{r}
+  m_LBW_multiv_sev<- glm(LBW ~ Grippe_severity3+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, family = "binomial", data=flu_cases_during_pregn_pandemy_sev_livebirths)
+   summary(m_LBW_multiv_sev)
+   nobs(m_LBW_multiv_sev)  
+```
+
+## Table
+```{r}
+LBW_GLM3 <- round(head(estimates_binary(m_LBW_multiv_sev),16), 2)
+
+  LBW_GLM3['Parameters'] <- c("intercept", 
+                            "Flu severity (ref: no flu)", "",  "Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  LBW_GLM3['category'] <- c(" ",
+                          "mild", "severe", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  LBW_GLM3<-LBW_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_LBW_gt <- LBW_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,958")
+    M_LBW_gt
+    
+LBW_estimates_gt <- M_LBW_gt%>%
+   gtsave(here("output/tables/models_flu_trimester_or_severity/severity/multivariable","M_LBW_severity_multiv.docx"))
+```
+
+## Marginal proportions
+```{r}
+m_LBW_a_mmeans_multiv <- ggemmeans(m_LBW_multiv_sev, "Grippe_severity3", margin="marginalmeans")
+m_LBW_a_mmeans_multiv <- mmeans_ci_vertic_bin(m_LBW_a_mmeans_multiv) 
+
+ m_LBW_a_mmeans_multiv['outcome'] <- c("LBW (<2,500g)")
+    m_LBW_a_mmeans_multiv['severity'] <- c("no", "mild", "severe")
+ m_LBW_a_mmeans_multiv<-m_LBW_a_mmeans_multiv[, c("outcome",'severity', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+m_LBW_a_mmeans_multiv
+```
+
+# PTB 
+```{r}
+    m_PTB_multiv_sev<- glm(PTB_corrected ~ Grippe_severity3+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, family = "binomial", data=flu_cases_during_pregn_pandemy_sev_livebirths)
+   summary(m_PTB_multiv_sev)
+   nobs(m_PTB_multiv_sev)  
+```
+
+## Table
+```{r}
+PTB_GLM3 <- round(head(estimates_binary(m_PTB_multiv_sev),16), 2)
+
+  PTB_GLM3['Parameters'] <- c("intercept", 
+                            "Flu severity (ref: no flu)", "", "Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  PTB_GLM3['category'] <- c(" ",
+                          "mild", "severe", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  PTB_GLM3<-PTB_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_PTB_gt <- PTB_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,958")
+    M_PTB_gt
+    
+PTB_estimates_gt <- M_PTB_gt%>%
+   gtsave(here("output/tables/models_flu_trimester_or_severity/severity/multivariable", "M_PTB_severity_multiv.docx"))
+```
+
+## Marginal proportions
+```{r}
+m_PTB_a_mmeans_multiv <- ggemmeans(m_PTB_multiv_sev, "Grippe_severity3", margin="marginalmeans")
+m_PTB_a_mmeans_multiv <- mmeans_ci_vertic_bin(m_PTB_a_mmeans_multiv) 
+
+ m_PTB_a_mmeans_multiv['outcome'] <- c("PTB (<37 weeks)")
+ m_PTB_a_mmeans_multiv['severity'] <- c("no", "mild", "severe")
+m_PTB_a_mmeans_multiv<-m_PTB_a_mmeans_multiv[, c("outcome",'severity', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+m_PTB_a_mmeans_multiv
+```
+
+
+# Pooling the tables for marginal proportions
+```{r}
+a_m_bin_outc_multiv_sev <- rbind(m_LBW_a_mmeans_multiv, m_PTB_a_mmeans_multiv)
+a_m_bin_outc_multiv_sev <- a_m_bin_outc_multiv_sev %>%
+  mutate(sex="all",
+         model="multivariable")
+
+a_m_bin_outc_multiv_sev%>%
+  gt() %>%
+  gtsave(here("output/tables/models_flu_trimester_or_severity/severity/multivariable", "M_bin_marg_prop_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+

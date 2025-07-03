@@ -1,0 +1,482 @@
+---
+title: "Univariable models"
+author: "Mathilde Le Vu"
+date: "2024-03-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Gest age 
+```{r}
+  m_GA_u_t<- rlm(GA_weeks_corrected ~ trimester_real_def3, data=flu_cases_during_pregn_pandemy_trimester_livebirths)
+  summary(m_GA_u_t)
+  nobs(m_GA_u_t)
+```
+
+### Table
+```{r}
+GA_GLM3 <- round(head(estimates_cont_rlm(m_GA_u_t)), 2)
+  GA_GLM3['Parameters'] <- c("intercept", 
+                            "Flu trimester (ref: no flu)", "", ""
+                            )
+  GA_GLM3['category'] <- c(" ",
+                          "first", "second", "third")
+  GA_GLM3<-GA_GLM3[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_GA_gt <- GA_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,071")
+    M_GA_gt
+    
+M_GA_gt%>%
+  gtsave(here("output/tables/models_flu_trimester_or_severity/trimester/univariable/rlm", "M_GA_trimester_univ.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_GA_a_mmeans_univ_t <- ggemmeans(m_GA_u_t, "trimester_real_def3")
+m_GA_a_mmeans_univ_t <- mmeans_ci_vertic_cont(m_GA_a_mmeans_univ_t) 
+
+ m_GA_a_mmeans_univ_t['outcome'] <- c("gestational age (weeks)")
+  m_GA_a_mmeans_univ_t['trimester'] <- c("no", "first", "second", "third")
+
+ m_GA_a_mmeans_univ_t<-m_GA_a_mmeans_univ_t[, c("outcome",'trimester', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# Birthweight 
+```{r}
+  m_BW_u_t<- rlm(birthweight ~ trimester_real_def3, data=flu_cases_during_pregn_pandemy_trimester_livebirths)
+  summary(m_BW_u_t)
+  nobs(m_BW_u_t)
+```
+
+### Table
+```{r}
+BW_GLM3 <- round(head(estimates_cont_rlm(m_BW_u_t)), 2)
+
+  BW_GLM3['Parameters'] <- c("intercept", 
+                            "Flu trimester (ref: no flu)", "", ""
+                            )
+  BW_GLM3['category'] <- c(" ",
+                          "first", "second", "third")
+  BW_GLM3<-BW_GLM3[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_BW_gt <- BW_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,071")
+    M_BW_gt
+    
+M_BW_gt%>%
+  gtsave(here("output/tables/models_flu_trimester_or_severity/trimester/univariable/rlm", "M_BW_trimester_univ.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_BW_a_mmeans_univ_t <- ggemmeans(m_BW_u_t, "trimester_real_def3")
+m_BW_a_mmeans_univ_t <- mmeans_ci_vertic_cont(m_BW_a_mmeans_univ_t) 
+
+ m_BW_a_mmeans_univ_t['outcome'] <- c("birth weight (g)")
+  m_BW_a_mmeans_univ_t['trimester'] <- c("no", "first", "second", "third")
+
+ m_BW_a_mmeans_univ_t<-m_BW_a_mmeans_univ_t[, c("outcome",'trimester', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# Head circumference 
+```{r}
+  m_HC_u_t<- rlm(head_circ ~ trimester_real_def3, data=flu_cases_during_pregn_pandemy_trimester_livebirths)
+summary(m_HC_u_t)
+nobs(m_HC_u_t)
+```
+### Table
+```{r}
+HC_GLM3 <- round(head(estimates_cont_rlm(m_HC_u_t)), 2)
+
+  HC_GLM3['Parameters'] <- c("intercept", 
+                            "Flu trimester (ref: no flu)", "", ""
+                            )
+  HC_GLM3['category'] <- c(" ",
+                          "first", "second", "third")
+  HC_GLM3 <- HC_GLM3[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_HC_gt <- HC_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,063")
+    M_HC_gt
+    
+M_HC_gt%>%
+   gtsave(here("output/tables/models_flu_trimester_or_severity/trimester/univariable/rlm", "M_HC_trimester_univ.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_HC_a_mmeans_univ_t <- ggemmeans(m_HC_u_t, "trimester_real_def3")
+m_HC_a_mmeans_univ_t <- mmeans_ci_vertic_cont(m_HC_a_mmeans_univ_t) 
+
+ m_HC_a_mmeans_univ_t['outcome'] <- c("head circumference (cm)")
+  m_HC_a_mmeans_univ_t['trimester'] <- c("no", "first", "second", "third")
+
+ m_HC_a_mmeans_univ_t<-m_HC_a_mmeans_univ_t[, c("outcome",'trimester', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# Placenta weight 
+```{r}
+  m_PW_u_t<- rlm(placentaweight ~ trimester_real_def3, data=flu_cases_during_pregn_pandemy_trimester_livebirths)
+  summary(m_PW_u_t)
+  nobs(m_PW_u_t)
+```
+
+### Table
+```{r}
+PW_GLM3 <-  round(head(estimates_cont_rlm(m_PW_u_t),17), 2)
+
+  PW_GLM3['Parameters'] <- c("intercept", 
+                            "Flu trimester (ref: no flu)", "", ""
+                            )
+  PW_GLM3['category'] <- c(" ",
+                          "first", "second", "third")
+  PW_GLM3 <- PW_GLM3[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_PW_gt <- PW_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,045")
+    M_PW_gt
+    
+M_PW_gt%>%
+    gtsave(here("output/tables/models_flu_trimester_or_severity/trimester/univariable/rlm","M_PW_trimester_univ.docx"))
+```
+## Marginally adjusted means
+```{r}
+m_PW_a_mmeans_univ_t <- ggemmeans(m_PW_u_t, "trimester_real_def3")
+m_PW_a_mmeans_univ_t <- mmeans_ci_vertic_cont(m_PW_a_mmeans_univ_t) 
+
+ m_PW_a_mmeans_univ_t['outcome'] <- c("placenta weight (g)")
+  m_PW_a_mmeans_univ_t['trimester'] <- c("no", "first", "second", "third")
+
+ m_PW_a_mmeans_univ_t<-m_PW_a_mmeans_univ_t[, c("outcome",'trimester', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# Birth length 
+```{r}
+  m_BL_u_t<- rlm(babylength ~ trimester_real_def3, data=flu_cases_during_pregn_pandemy_trimester_livebirths)
+  summary(m_BL_u_t)
+  nobs(m_BL_u_t)
+```
+### Table
+```{r}
+BL_GLM3 <- round(head(estimates_cont_rlm(m_BL_u_t)), 2)
+
+  BL_GLM3['Parameters'] <- c("intercept", 
+                            "Flu trimester (ref: no flu)", "", ""
+                            )
+  BL_GLM3['category'] <- c(" ",
+                          "first", "second", "third")
+  BL_GLM3 <- BL_GLM3[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_BL_gt <- BL_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,067")
+    M_BL_gt
+    
+M_BL_gt%>%
+    gtsave(here("output/tables/models_flu_trimester_or_severity/trimester/univariable/rlm","M_BL_trimester_univ.docx"))
+```
+## Marginally adjusted means
+```{r}
+m_BL_a_mmeans_univ_t <- ggemmeans(m_BL_u_t, "trimester_real_def3")
+m_BL_a_mmeans_univ_t <- mmeans_ci_vertic_cont(m_BL_a_mmeans_univ_t) 
+
+ m_BL_a_mmeans_univ_t['outcome'] <- c("birth length (cm)")
+  m_BL_a_mmeans_univ_t['trimester'] <- c("no", "first", "second", "third")
+
+ m_BL_a_mmeans_univ_t<-m_BL_a_mmeans_univ_t[, c("outcome",'trimester', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# PI 
+```{r}
+  m_PI_u_t<- rlm(PI ~ trimester_real_def3, data=flu_cases_during_pregn_pandemy_trimester_livebirths)
+  summary(m_PI_u_t)
+  nobs(m_PI_u_t)
+```
+### Table
+```{r}
+PI_GLM3 <-  round(head(estimates_cont_rlm(m_PI_u_t),17), 2)
+
+  PI_GLM3['Parameters'] <- c("intercept", 
+                            "Flu trimester (ref: no flu)", "", ""
+                            )
+  PI_GLM3['category'] <- c(" ",
+                          "first", "second", "third")
+  PI_GLM3 <- PI_GLM3[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_PI_gt <- PI_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,067")
+    M_PI_gt
+    
+M_PI_gt%>%
+   gtsave(here("output/tables/models_flu_trimester_or_severity/trimester/univariable/rlm","M_PI_trimester_univ.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_PI_a_mmeans_univ_t <- ggemmeans(m_PI_u_t, "trimester_real_def3")
+m_PI_a_mmeans_univ_t <- mmeans_ci_vertic_cont(m_PI_a_mmeans_univ_t) 
+
+ m_PI_a_mmeans_univ_t['outcome'] <- c("ponderal index")
+  m_PI_a_mmeans_univ_t['trimester'] <- c("no", "first", "second", "third")
+
+ m_PI_a_mmeans_univ_t<-m_PI_a_mmeans_univ_t[, c("outcome",'trimester', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+
+# Pooling the tables for marginal means
+```{r}
+a_m_cont_outc_univ_trim <- rbind(m_BW_a_mmeans_univ_t, m_HC_a_mmeans_univ_t, 
+                                m_PW_a_mmeans_univ_t, m_BL_a_mmeans_univ_t, 
+                                m_PI_a_mmeans_univ_t, m_GA_a_mmeans_univ_t)
+a_m_cont_outc_univ_trim <- a_m_cont_outc_univ_trim%>%
+ mutate(sex="all",
+         model="univariable")
+a_m_cont_outc_univ_trim%>%
+  gt() %>%
+  gtsave(here("output/tables/models_flu_trimester_or_severity/trimester/univariable/rlm", "M_cont_marg_means_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+# LBW 
+```{r}
+ m_LBW_u_t<- glm(LBW ~ trimester_real_def3, family = "binomial", data=flu_cases_during_pregn_pandemy_trimester_livebirths)
+  summary(m_LBW_u_t)
+  nobs(m_LBW_u_t)
+```
+
+## Table
+```{r}
+LBW_GLM3 <- round(head(estimates_binary(m_LBW_u_t)), 2)
+
+  LBW_GLM3['Parameters'] <- c("intercept", 
+                            "Flu trimester (ref: no flu)", "", ""
+                            )
+  LBW_GLM3['category'] <- c(" ",
+                          "first", "second", "third")
+  LBW_GLM3<-LBW_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_LBW_gt <- LBW_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,071")
+    M_LBW_gt
+    
+LBW_estimates_gt <- M_LBW_gt%>%
+   gtsave(here("output/tables/models_flu_trimester_or_severity/trimester/univariable", "M_LBW_trimester_univ.docx"))
+```
+## Marginally adjusted means
+```{r}
+m_LBW_a_mmeans_univ_t <- ggemmeans(m_LBW_u_t, "trimester_real_def3")
+m_LBW_a_mmeans_univ_t <- mmeans_ci_vertic_bin(m_LBW_a_mmeans_univ_t) 
+
+ m_LBW_a_mmeans_univ_t['outcome'] <- c("LBW (<2,500g)")
+  m_LBW_a_mmeans_univ_t['trimester'] <- c("no", "first", "second", "third")
+
+ m_LBW_a_mmeans_univ_t<-m_LBW_a_mmeans_univ_t[, c("outcome",'trimester', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# stillbirth 
+```{r}
+ m_SB_u_t<- glm(stillbirth ~ trimester_real_def3, family = binomial, data=flu_cases_during_pregn_pandemy_trimester)
+  summary(m_SB_u_t)
+  nobs(m_SB_u_t)
+```
+## Table
+```{r}
+SB_GLM3 <- round(head(estimates_binary(m_SB_u_t)), 2)
+
+  SB_GLM3['Parameters'] <- c("intercept", 
+                            "Flu trimester (ref: no flu)", "", ""
+                            )
+  SB_GLM3['category'] <- c(" ",
+                          "first", "second", "third")
+  SB_GLM3<-SB_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_SB_gt <- SB_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,163")
+    M_SB_gt
+    
+SB_estimates_gt <- M_SB_gt%>%
+   gtsave(here("output/tables/models_flu_trimester_or_severity/trimester/univariable", "M_SB_trimester_univ.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_SB_a_mmeans_univ_t <- ggemmeans(m_SB_u_t, "trimester_real_def3")
+m_SB_a_mmeans_univ_t <- mmeans_ci_vertic_bin(m_SB_a_mmeans_univ_t) 
+
+ m_SB_a_mmeans_univ_t['outcome'] <- c("stillbirth")
+  m_SB_a_mmeans_univ_t['trimester'] <- c("no", "first", "second", "third")
+
+ m_SB_a_mmeans_univ_t<-m_SB_a_mmeans_univ_t[, c("outcome",'trimester', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# PTB 
+```{r}
+ m_PTB_u_t<- glm(PTB_corrected ~ trimester_real_def3, family = "binomial", data=flu_cases_during_pregn_pandemy_trimester_livebirths)
+  summary(m_PTB_u_t)
+  nobs(m_PTB_u_t)
+```
+
+### Table
+```{r}
+PTB_GLM3 <- round(head(estimates_binary(m_PTB_u_t)), 2)
+
+  PTB_GLM3['Parameters'] <- c("intercept", 
+                            "Flu trimester (ref: no flu)", "", ""
+                            )
+  PTB_GLM3['category'] <- c(" ",
+                          "first", "second", "third")
+  PTB_GLM3<-PTB_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_PTB_gt <- PTB_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,071")
+    M_PTB_gt
+    
+PTB_estimates_gt <- M_PTB_gt%>%
+   gtsave(here("output/tables/models_flu_trimester_or_severity/trimester/univariable", "M_PTB_trimester_univ.docx"))
+```
+### Marginal proportions
+```{r}
+m_PTB_a_mmeans_univ_t <- ggemmeans(m_PTB_u_t, "trimester_real_def3", margin="marginalmeans")
+
+m_PTB_a_mmeans_univ_t <- mmeans_ci_vertic_bin(m_PTB_a_mmeans_univ_t) 
+
+ m_PTB_a_mmeans_univ_t['outcome'] <- c("PTB (<37 weeks)")
+  m_PTB_a_mmeans_univ_t['trimester'] <- c("no", "first", "second", "third")
+m_PTB_a_mmeans_univ_t<-m_PTB_a_mmeans_univ_t[, c("outcome",'trimester', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# Neonat mortality
+```{r}
+ m_NM_u_t<- glm(neonat_mort_d1_d5 ~ trimester_real_def3, family = "binomial", data=flu_cases_during_pregn_pandemy_trimester_livebirths)
+  summary(m_NM_u_t)
+  nobs(m_NM_u_t)
+```
+
+### Table
+```{r}
+NM_GLM3 <- round(head(estimates_binary(m_NM_u_t)), 2)
+
+  NM_GLM3['Parameters'] <- c("intercept", 
+                            "Flu trimester (ref: no flu)", "", ""
+                            )
+  NM_GLM3['category'] <- c(" ",
+                          "first", "second", "third")
+  NM_GLM3<-NM_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_NM_gt <- NM_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  )%>%
+     tab_source_note(source_note = "n=2,070")
+    M_NM_gt
+    
+NM_estimates_gt <- M_NM_gt%>%
+   gtsave(here("output/tables/models_flu_trimester_or_severity/trimester/univariable", "M_NM_trimester_univ.docx"))
+```
+
+### Marginal proportions
+```{r}
+m_NM_a_mmeans_multiv_t <- ggemmeans(m_NM_u_t, "trimester_real_def3", margin="marginalmeans")
+
+m_NM_a_mmeans_multiv_t <- mmeans_ci_vertic_bin(m_NM_a_mmeans_multiv_t) 
+
+ m_NM_a_mmeans_multiv_t['outcome'] <- c("early neonatal mortality")
+  m_NM_a_mmeans_multiv_t['trimester'] <- c("no", "first", "second", "third")
+m_NM_a_mmeans_multiv_t<-m_NM_a_mmeans_multiv_t[, c("outcome",'trimester', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+
+
+# Pooling the tables for marginal proportions
+```{r}
+a_m_bin_outc_univ_trim <- rbind(m_LBW_a_mmeans_univ_t, m_PTB_a_mmeans_univ_t,m_SB_a_mmeans_univ_t)
+                                #,m_NM_a_mmeans_multiv_t # not enough cases
+ a_m_bin_outc_univ_trim  <- a_m_bin_outc_univ_trim%>%
+ mutate(sex="all",
+         model="univariable")
+a_m_bin_outc_univ_trim%>%
+  gt() %>%
+  gtsave(here("output/tables/models_flu_trimester_or_severity/trimester/univariable", "M_bin_marg_prop_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+

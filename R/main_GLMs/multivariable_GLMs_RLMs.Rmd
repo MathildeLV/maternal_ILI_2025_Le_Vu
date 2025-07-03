@@ -1,0 +1,627 @@
+---
+title: "Univariable models"
+author: "Mathilde Le Vu"
+date: "2024-03-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Gestational age 
+```{r}
+  m_GA_a<- rlm(GA_weeks_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season, data=pandemy_livebirths)
+  summary(m_GA_a)
+  
+#adding variables one at a time
+  #morphology
+  m_GA_b<- rlm(GA_weeks_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology, data=pandemy_livebirths)
+  AIC(m_GA_b)-AIC(m_GA_a) 
+  #morphology improves model fit
+  
+  # civil status
+  m_GA_c<- rlm(GA_weeks_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2, data=pandemy_livebirths)
+   AIC(m_GA_c)-AIC(m_GA_b) 
+  #civil status improves model fit
+
+   # living inside Lausanne
+  m_GA_d<- rlm(GA_weeks_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, data=pandemy_livebirths)
+  AIC(m_GA_d)-AIC(m_GA_c) 
+  # Lausanne improves model fit
+  
+   # HISCO class
+  m_GA_e<- rlm(GA_weeks_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU+hisco_class_3, data=pandemy_livebirths)
+  AIC(m_GA_e)-AIC(m_GA_d) 
+  # Hisco does not improve model fit
+  
+  # goitre
+  m_GA_f<- rlm(GA_weeks_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU+Goitre, data=pandemy_livebirths)
+  AIC(m_GA_f)-AIC(m_GA_d) 
+  # Goitre doesnt improve model fit
+  
+  # rickets
+  m_GA_g<- rlm(GA_weeks_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU+rickets, data=pandemy_livebirths)
+  AIC(m_GA_g)-AIC(m_GA_d) 
+  # Rickets doesnt improve model fit
+  
+ # final model
+   m_GA_d<- rlm(GA_weeks_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, data=pandemy_livebirths)
+   summary(m_GA_d)
+   nobs(m_GA_d) 
+   
+car::vif(m_GA_d)    
+
+plot(m_GA_d)
+```
+
+## Table
+```{r}
+GA_GLM_flu_mod <- round(head(estimates_cont_rlm(m_GA_d),15), 2)
+
+  GA_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)", "Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  GA_GLM_flu_mod['category'] <- c(" ",
+                          "yes", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  GA_GLM_flu_mod<-GA_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_GA_gt <- GA_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,999")
+    M_GA_gt
+    
+M_GA_gt%>%
+  gtsave(here("output/tables/main_models/multivariable/rlm", "M_GA_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_GA_a_mmeans_multiv <- ggemmeans(m_GA_d, "Flu_in_pregn_and_in_pandemic")
+m_GA_a_mmeans_multiv <- mmeans_ci_vertic_cont(m_GA_a_mmeans_multiv) 
+
+ m_GA_a_mmeans_multiv['outcome'] <- c("gestational age (weeks)")
+   m_GA_a_mmeans_multiv['flu exp'] <- c("no", "yes")
+
+ m_GA_a_mmeans_multiv<-m_GA_a_mmeans_multiv[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+
+# Birthweight 
+```{r}
+   m_BW<- rlm(birthweight ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU+rickets+Goitre+hisco_class_3, data=pandemy_livebirths)
+
+# Perform stepwise selection (done with glm but doesnt work for rlm)
+# scope_list <- list(
+#   lower = ~ Flu_in_pregn_and_in_pandemic + age_mother + height + parity_cat2 + sex + season,
+#   upper = ~ Flu_in_pregn_and_in_pandemic + age_mother + height + parity_cat2 + sex + season +
+#              morphology + civil_status_cat2 + Lausanne_NEU + rickets + Goitre + hisco_class_3
+# )
+
+# # Perform stepwise selection
+# m_BW_d <- step(m_BW, scope = scope_list)
+# summary(m_BW_d)
+# plot(m_BW_d)
+
+m_BW_d<- rlm(birthweight ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, data=pandemy_livebirths)
+```
+
+## Table
+```{r}
+BW_GLM_flu_mod <- round(head(estimates_cont_rlm(m_BW_d),15), 2)
+
+  BW_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)", "Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  BW_GLM_flu_mod['category'] <- c(" ",
+                          "yes", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  BW_GLM_flu_mod<-BW_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_BW_gt <- BW_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,999")
+    M_BW_gt
+    
+M_BW_gt%>%
+  gtsave(here("output/tables/main_models/multivariable/rlm", "M_BW_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_BW_a_mmeans_multiv <- ggemmeans(m_BW_d, "Flu_in_pregn_and_in_pandemic")
+m_BW_a_mmeans_multiv <- mmeans_ci_vertic_cont(m_BW_a_mmeans_multiv) 
+
+ m_BW_a_mmeans_multiv['outcome'] <- c("birth weight (g)")
+    m_BW_a_mmeans_multiv['flu exp'] <- c("no", "yes")
+  m_BW_a_mmeans_multiv<-m_BW_a_mmeans_multiv[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# Head circumference 
+```{r}
+ m_HC_d <- rlm(head_circ ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, data=pandemy_livebirths)
+```
+## Table
+```{r}
+HC_GLM_flu_mod <- round(head(estimates_cont_rlm(m_HC_d),15), 2)
+
+  HC_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)", "Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  HC_GLM_flu_mod['category'] <- c(" ",
+                          "yes", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  HC_GLM_flu_mod <- HC_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_HC_gt <- HC_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,992")
+    M_HC_gt
+    
+M_HC_gt%>%
+  gtsave(here("output/tables/main_models/multivariable/rlm", "M_HC_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_HC_a_mmeans_multiv <- ggemmeans(m_HC_d, "Flu_in_pregn_and_in_pandemic")
+m_HC_a_mmeans_multiv <- mmeans_ci_vertic_cont(m_HC_a_mmeans_multiv) 
+
+ m_HC_a_mmeans_multiv['outcome'] <- c("head circumference (cm)")
+ m_HC_a_mmeans_multiv['flu exp'] <- c("no", "yes")
+  m_HC_a_mmeans_multiv<-m_HC_a_mmeans_multiv[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+
+# Placenta weight 
+```{r}
+m_PW_d<- rlm(placentaweight ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, data=pandemy_livebirths)
+```
+
+## Table
+```{r}
+PW_GLM_flu_mod <- round(head(estimates_cont_rlm(m_PW_d),15), 2)
+
+PW_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)", "Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  PW_GLM_flu_mod['category'] <- c(" ",
+                          "yes", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  PW_GLM_flu_mod <- PW_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_PW_gt <- PW_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,977")
+    M_PW_gt
+    
+M_PW_gt%>%
+  gtsave(here("output/tables/main_models/multivariable/rlm", "M_PW_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_PW_a_mmeans_multiv <- ggemmeans(m_PW_d, "Flu_in_pregn_and_in_pandemic")
+m_PW_a_mmeans_multiv <- mmeans_ci_vertic_cont(m_PW_a_mmeans_multiv) 
+
+ m_PW_a_mmeans_multiv['outcome'] <- c("placenta weight (g)")
+  m_PW_a_mmeans_multiv['flu exp'] <- c("no", "yes")
+  m_PW_a_mmeans_multiv<-m_PW_a_mmeans_multiv[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# Birth length 
+```{r}
+m_BL_d<- rlm(babylength ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, data=pandemy_livebirths)
+```
+
+## Table
+```{r}
+BL_GLM_flu_mod <- round(head(estimates_cont_rlm(m_BL_d),15), 2)
+
+  BL_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)", "Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  BL_GLM_flu_mod['category'] <- c(" ",
+                          "yes", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  BL_GLM_flu_mod <- BL_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_BL_gt <- BL_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,1997")
+    M_BL_gt
+    
+M_BL_gt%>%
+  gtsave(here("output/tables/main_models/multivariable/rlm", "M_BL_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_BL_a_mmeans_multiv <- ggemmeans(m_BL_d, "Flu_in_pregn_and_in_pandemic")
+m_BL_a_mmeans_multiv <- mmeans_ci_vertic_cont(m_BL_a_mmeans_multiv) 
+
+ m_BL_a_mmeans_multiv['outcome'] <- c("birth length (cm)")
+    m_BL_a_mmeans_multiv['flu exp'] <- c("no", "yes")
+ m_BL_a_mmeans_multiv<-m_BL_a_mmeans_multiv[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+
+# PI 
+```{r}
+  m_PI_a<- rlm(PI ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season, data=pandemy_livebirths)
+  summary(m_PI_a)
+  
+  #adding variables one at a time
+  #morphology
+  m_PI_b<- rlm(PI ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology, data=pandemy_livebirths)
+  AIC(m_PI_b)-AIC(m_PI_a) 
+  #morphology improves model fit
+  
+  # civil status
+  m_PI_c <- rlm(PI ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2, data=pandemy_livebirths)
+   AIC(m_PI_c)-AIC(m_PI_b) 
+  #civil status improves model fit
+
+   # living inside Lausanne
+  m_PI_d<- rlm(PI ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, data=pandemy_livebirths)
+  AIC(m_PI_d)-AIC(m_PI_c) 
+  # Lausanne improves model fit
+  
+   # HISCO class
+  m_PI_e<- rlm(PI ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU+hisco_class_3, data=pandemy_livebirths)
+  AIC(m_PI_e)-AIC(m_PI_d) 
+  # Hisco does not improve model fit
+  
+  # goitre
+  m_PI_f<- rlm(PI ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU+Goitre, data=pandemy_livebirths)
+  AIC(m_PI_f)-AIC(m_PI_d) 
+  # Goitre doesnt improve model fit
+  
+  # rickets
+  m_PI_g<- rlm(PI ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU+rickets, data=pandemy_livebirths)
+  AIC(m_PI_g)-AIC(m_PI_d) 
+  # Rickets doesnt improve model fit
+  
+ # final model
+   m_PI_d<- rlm(PI ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, data=pandemy_livebirths)
+   summary(m_PI_d)
+   nobs(m_PI_d)
+```
+
+## Table
+```{r}
+PI_GLM3 <- round(head(estimates_cont_rlm(m_PI_d),15), 2)
+
+  PI_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)", "Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  PI_GLM3['category'] <- c(" ",
+                          "yes", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  PI_GLM3 <- PI_GLM3[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_PI_gt <- PI_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,997")
+    M_PI_gt
+    
+M_PI_gt%>%
+  gtsave(here("output/tables/main_models/multivariable/rlm", "M_PI_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+## Marginally adjusted means
+```{r}
+m_PI_a_mmeans_multiv <- ggemmeans(m_PI_d, "Flu_in_pregn_and_in_pandemic")
+m_PI_a_mmeans_multiv <- mmeans_ci_vertic_cont(m_PI_a_mmeans_multiv) 
+
+ m_PI_a_mmeans_multiv['outcome'] <- c("ponderal index")
+     m_PI_a_mmeans_multiv['flu exp'] <- c("no", "yes")
+  m_PI_a_mmeans_multiv<-m_PI_a_mmeans_multiv[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# Pooling the tables for predicted means together
+```{r}
+a_m_cont_outc_u_multiv <- rbind(m_BW_a_mmeans_multiv, m_HC_a_mmeans_multiv,
+                                m_PW_a_mmeans_multiv,m_BL_a_mmeans_multiv,
+                                m_PI_a_mmeans_multiv, m_GA_a_mmeans_multiv)
+a_m_cont_outc_u_multiv <- a_m_cont_outc_u_multiv %>%
+  mutate(sex="all",
+         model="multivariable")
+a_m_cont_outc_u_multiv%>%
+  gt() %>%
+  gtsave(here("output/tables/main_models/multivariable/rlm", "M_cont_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+
+
+# LBW 
+```{r}
+ m_LBW_a<- glm(LBW ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season, family = "binomial", data=pandemy_livebirths)
+  summary(m_LBW_a)
+
+  #adding variables one at a time
+  #morphology
+  m_LBW_b<- glm(LBW ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology, family = "binomial", data=pandemy_livebirths)
+  AIC(m_LBW_b)-AIC(m_LBW_a) 
+  #morphology improves model fit
+  
+  # civil status
+  m_LBW_c <- glm(LBW ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2, family = "binomial", data=pandemy_livebirths)
+   AIC(m_LBW_c)-AIC(m_LBW_b) 
+  #civil status improves model fit
+
+   # living inside Lausanne
+  m_LBW_d<- glm(LBW ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, family = "binomial", data=pandemy_livebirths)
+  AIC(m_LBW_d)-AIC(m_LBW_c) 
+  # Lausanne improves model fit
+  
+   # HISCO class
+  m_LBW_e<- glm(LBW ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU+hisco_class_3, family = "binomial", data=pandemy_livebirths)
+  AIC(m_LBW_e)-AIC(m_LBW_d) 
+  # Hisco does not improve model fit
+  
+  # goitre
+  m_LBW_f<- glm(LBW ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU+Goitre, family = "binomial", data=pandemy_livebirths)
+  AIC(m_LBW_f)-AIC(m_LBW_d) 
+  # Goitre does improve model fit but not kept for consistency among models
+  
+  # rickets
+  m_LBW_g<- glm(LBW ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU+rickets, family = "binomial", data=pandemy_livebirths)
+  AIC(m_LBW_g)-AIC(m_LBW_d) 
+  # Rickets doesnt improve model fit
+  
+ # final model
+   m_LBW_d<- glm(LBW ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, family = "binomial", data=pandemy_livebirths)
+   summary(m_LBW_d)
+   nobs(m_LBW_d)  
+   car::vif(m_LBW_d)
+
+```
+
+## Table
+```{r}
+LBW_GLM3 <- round(head(estimates_binary(m_LBW_d),15), 2)
+
+  LBW_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)", "Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  LBW_GLM3['category'] <- c(" ",
+                          "yes", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  LBW_GLM3<-LBW_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_LBW_gt <- LBW_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,999")
+    M_LBW_gt
+    
+LBW_estimates_gt <- M_LBW_gt%>%
+  gtsave(here("output/tables/main_models/multivariable", "M_LBW_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+## Marginal proportions
+```{r}
+m_LBW_a_mmeans_multiv <- ggemmeans(m_LBW_d, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+m_LBW_a_mmeans_multiv <- mmeans_ci_vertic_bin(m_LBW_a_mmeans_multiv) 
+
+ m_LBW_a_mmeans_multiv['outcome'] <- c("LBW (<2,500g)")
+    m_LBW_a_mmeans_multiv['flu exp'] <- c("no", "yes")
+ m_LBW_a_mmeans_multiv<-m_LBW_a_mmeans_multiv[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+m_LBW_a_mmeans_multiv
+```
+
+# PTB 
+```{r}
+ m_PTB_a<- glm(PTB_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season, family = "binomial", data=pandemy_livebirths)
+  summary(m_PTB_a)
+
+#adding variables one at a time
+  #morphology
+  m_PTB_b<- glm(PTB_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology, family = "binomial", data=pandemy_livebirths)
+  AIC(m_PTB_b)-AIC(m_PTB_a) 
+  #morphology improves model fit
+  
+  # civil status
+  m_PTB_c <- glm(PTB_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2, family = "binomial", data=pandemy_livebirths)
+   AIC(m_PTB_c)-AIC(m_PTB_b) 
+  #civil status improves model fit
+
+   # living inside Lausanne
+  m_PTB_d<- glm(PTB_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, family = "binomial", data=pandemy_livebirths)
+  AIC(m_PTB_d)-AIC(m_PTB_c) 
+  # Lausanne improves model fit
+  
+   # HISCO class
+  m_PTB_e<- glm(PTB_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU+hisco_class_3, family = "binomial", data=pandemy_livebirths)
+  AIC(m_PTB_e)-AIC(m_PTB_d) 
+  # Hisco does not improve model fit
+  
+  # goitre
+  m_PTB_f<- glm(PTB_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU+Goitre, family = "binomial", data=pandemy_livebirths)
+  AIC(m_PTB_f)-AIC(m_PTB_d) 
+  # Goitre doesnt improve model fit
+  
+  # rickets
+  m_PTB_g<- glm(PTB_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU+rickets, family = "binomial", data=pandemy_livebirths)
+  AIC(m_PTB_g)-AIC(m_PTB_d) 
+  # Rickets doesnt improve model fit
+  
+ # final model
+   m_PTB_d<- glm(PTB_corrected ~ Flu_in_pregn_and_in_pandemic+age_mother+height+parity_cat2+sex+
+                 season+morphology+civil_status_cat2+Lausanne_NEU, family = "binomial", data=pandemy_livebirths)
+   summary(m_PTB_d)
+   nobs(m_PTB_d)  
+   car::vif(m_PTB_d)
+```
+
+## Table
+```{r}
+PTB_GLM3 <- round(head(estimates_binary(m_PTB_d),15), 2)
+
+  PTB_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)", "Maternal age", "Maternal height",
+                            "Parity (ref: 1)", "", "Sex (ref: male)", "Season (ref: spring)",
+                            "", "", "Morphology (ref: none)", "", "Civil status (ref: married)",
+                            "Living inside Lausanne (ref: yes)"
+                            )
+  PTB_GLM3['category'] <- c(" ",
+                          "yes", "", "",
+                          "2", ">2", "female", "summer", "autumn", "winter",
+                          "obese", "thin", "single or missing", "no or unsure")
+  PTB_GLM3<-PTB_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_PTB_gt <- PTB_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,999")
+    M_PTB_gt
+    
+PTB_estimates_gt <- M_PTB_gt%>%
+  gtsave(here("output/tables/main_models/multivariable", "M_PTB_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+## Marginal proportions
+```{r}
+m_PTB_a_mmeans_multiv <- ggemmeans(m_PTB_d, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+m_PTB_a_mmeans_multiv <- mmeans_ci_vertic_bin(m_PTB_a_mmeans_multiv) 
+
+ m_PTB_a_mmeans_multiv['outcome'] <- c("PTB (<37 weeks)")
+ m_PTB_a_mmeans_multiv['flu exp'] <- c("no", "yes")
+m_PTB_a_mmeans_multiv<-m_PTB_a_mmeans_multiv[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+m_PTB_a_mmeans_multiv
+```
+
+
+# Pooling the tables for marginal proportions
+```{r}
+a_m_bin_outc_multiv <- rbind(m_LBW_a_mmeans_multiv, m_PTB_a_mmeans_multiv)
+a_m_bin_outc_multiv <- a_m_bin_outc_multiv %>%
+  mutate(sex="all",
+         model="multivariable")
+
+a_m_bin_outc_multiv%>%
+  gt() %>%
+  gtsave(here("output/tables/main_models/multivariable", "M_bin_marg_prop_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+

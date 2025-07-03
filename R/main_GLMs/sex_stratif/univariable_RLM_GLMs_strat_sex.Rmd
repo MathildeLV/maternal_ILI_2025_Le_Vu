@@ -1,0 +1,913 @@
+---
+title: "Univariable models"
+author: "Mathilde Le Vu"
+date: "2024-03-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Gestational age 
+```{r}
+  m_GA_f_u<- rlm(GA_weeks_corrected ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths, subset=(sex=="Female"))
+  summary(m_GA_f_u)
+  nobs(m_GA_f_u)
+
+  m_GA_m_u<- rlm(GA_weeks_corrected ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths, subset=(sex=="Male"))
+  summary(m_GA_m_u)
+  nobs(m_GA_m_u)
+```
+
+## Table FEMALES
+```{r}
+GA_GLM_flu_mod <- round(head(estimates_cont_rlm(m_GA_f_u)), 2)
+
+  GA_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  GA_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  GA_GLM_flu_mod<-GA_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_GA_gt <- GA_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,013")
+    M_GA_gt
+    
+M_GA_gt%>%
+  gtsave(here("output/tables/main_models/sex_stratif/univariable/rlm", "M_GA_estimates_Flu_in_pregn_and_in_pandemic_gt_F.docx"))
+```
+
+## Table MALES
+```{r}
+GA_GLM_flu_mod <- round(head(estimates_cont_rlm(m_GA_m_u)), 2)
+
+  GA_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  GA_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  GA_GLM_flu_mod<-GA_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_GA_gt <- GA_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,069")
+    M_GA_gt
+    
+M_GA_gt%>%
+   gtsave(here("output/tables/main_models/sex_stratif/univariable/rlm", "M_GA_estimates_Flu_in_pregn_and_in_pandemic_gt_M.docx"))
+```
+
+## Marginally adjusted means FEMALES
+```{r}
+m_GA_a_mmeans_f <- ggemmeans(m_GA_f_u, "Flu_in_pregn_and_in_pandemic")
+a_m_GA_u_f <- mmeans_ci_vertic_cont(m_GA_a_mmeans_f) 
+
+a_m_GA_u_f['outcome'] <- c("gestational age (weeks)")
+a_m_GA_u_f['sex'] <- c("females")
+a_m_GA_u_f['flu exp'] <- c("no", "yes")
+a_m_GA_u_f<-a_m_GA_u_f[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+## Marginally adjusted means MALES
+```{r}
+m_GA_a_mmeans_m <- ggemmeans(m_GA_m_u, "Flu_in_pregn_and_in_pandemic")
+a_m_GA_u_m <- mmeans_ci_vertic_cont(m_GA_a_mmeans_m) 
+
+a_m_GA_u_m['outcome'] <- c("gestational age (weeks)")
+a_m_GA_u_m['sex'] <- c("males")
+a_m_GA_u_m['flu exp'] <- c("no", "yes")
+a_m_GA_u_m<-a_m_GA_u_m[,c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+# Birthweight 
+```{r}
+  m_BW_f_u<- rlm(birthweight ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths, subset=(sex=="Female"))
+  summary(m_BW_f_u)
+  nobs(m_BW_f_u)
+
+  m_BW_m_u<- rlm(birthweight ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths, subset=(sex=="Male"))
+  summary(m_BW_m_u)
+  nobs(m_BW_m_u)
+```
+
+## Table FEMALES
+```{r}
+BW_GLM_flu_mod <- round(head(estimates_cont_rlm(m_BW_f_u)), 2)
+
+  BW_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  BW_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  BW_GLM_flu_mod<-BW_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_BW_gt <- BW_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,013")
+    M_BW_gt
+    
+M_BW_gt%>%
+  gtsave(here("output/tables/main_models/sex_stratif/univariable/rlm", "M_BW_estimates_Flu_in_pregn_and_in_pandemic_gt_F.docx"))
+```
+
+## Table MALES
+```{r}
+BW_GLM_flu_mod <- round(head(estimates_cont_rlm(m_BW_m_u)), 2)
+
+  BW_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  BW_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  BW_GLM_flu_mod<-BW_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_BW_gt <- BW_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,069")
+    M_BW_gt
+    
+M_BW_gt%>%
+  gtsave(here("output/tables/main_models/sex_stratif/univariable/rlm", "M_BW_estimates_Flu_in_pregn_and_in_pandemic_gt_M.docx"))
+```
+## Marginally adjusted means FEMALES
+```{r}
+m_BW_a_mmeans_f <- ggemmeans(m_BW_f_u, "Flu_in_pregn_and_in_pandemic")
+a_m_BW_u_f <- mmeans_ci_vertic_cont(m_BW_a_mmeans_f) 
+
+a_m_BW_u_f['outcome'] <- c("birth weight (g)")
+a_m_BW_u_f['sex'] <- c("females")
+a_m_BW_u_f['flu exp'] <- c("no", "yes")
+a_m_BW_u_f<-a_m_BW_u_f[,c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+## Marginally adjusted means MALES
+```{r}
+m_BW_a_mmeans_m <- ggemmeans(m_BW_m_u, "Flu_in_pregn_and_in_pandemic")
+a_m_BW_u_m <- mmeans_ci_vertic_cont(m_BW_a_mmeans_m) 
+
+a_m_BW_u_m['outcome'] <- c("birth weight (g)")
+a_m_BW_u_m['sex'] <- c("males")
+a_m_BW_u_m['flu exp'] <- c("no", "yes")
+a_m_BW_u_m<-a_m_BW_u_m[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+# Head circumference 
+```{r}
+m_HC_f_u<- rlm(head_circ ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths, subset = (sex=="Female"))
+summary(m_HC_f_u)
+nobs(m_HC_f_u)
+
+m_HC_m_u<- rlm(head_circ ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths, subset = (sex=="Male"))
+summary(m_HC_m_u)
+nobs(m_HC_m_u)
+```
+
+## Table FEMALES
+```{r}
+HC_GLM_flu_mod <- round(head(estimates_cont_rlm(m_HC_f_u)), 2)
+
+  HC_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  HC_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  HC_GLM_flu_mod <- HC_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_HC_gt <- HC_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,008")
+    M_HC_gt
+    
+M_HC_gt%>%
+    gtsave(here("output/tables/main_models/sex_stratif/univariable/rlm",
+              "M_HC_estimates_Flu_in_pregn_and_in_pandemic_gt_F.docx"))
+```
+
+## Table MALES
+```{r}
+HC_GLM_flu_mod <- round(head(estimates_cont_rlm(m_HC_m_u)), 2)
+
+  HC_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  HC_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  HC_GLM_flu_mod <- HC_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_HC_gt <- HC_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,066")
+    M_HC_gt
+    
+M_HC_gt%>%
+   gtsave(here("output/tables/main_models/sex_stratif/univariable/rlm",
+              "M_HC_estimates_Flu_in_pregn_and_in_pandemic_gt_M.docx"))
+```
+
+## Marginally adjusted means FEMALES
+```{r}
+m_HC_a_mmeans_f <- ggemmeans(m_HC_f_u, "Flu_in_pregn_and_in_pandemic")
+a_m_HC_u_f <- mmeans_ci_vertic_cont(m_HC_a_mmeans_f) 
+
+a_m_HC_u_f['outcome'] <- c("head circumference (cm)")
+a_m_HC_u_f['sex'] <- c("females")
+a_m_HC_u_f['flu exp'] <- c("no", "yes")
+a_m_HC_u_f<-a_m_HC_u_f[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+## Marginally adjusted means MALES
+```{r}
+m_HC_a_mmeans_m <- ggemmeans(m_HC_m_u, "Flu_in_pregn_and_in_pandemic")
+a_m_HC_u_m <- mmeans_ci_vertic_cont(m_HC_a_mmeans_m) 
+
+a_m_HC_u_m['outcome'] <- c("head circumference (cm)")
+a_m_HC_u_m['sex'] <- c("males")
+a_m_HC_u_m['flu exp'] <- c("no", "yes")
+a_m_HC_u_m<-a_m_HC_u_m[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+# Placenta weight 
+```{r}
+  m_PW_f_u<- rlm(placentaweight ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths, subset=(sex=="Female"))
+  summary(m_PW_f_u)
+  nobs(m_PW_f_u)
+
+  m_PW_m_u <- rlm(placentaweight ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths, subset=(sex=="Male"))
+  summary(m_PW_m_u)
+  nobs(m_PW_m_u)
+```
+
+## Table FEMALES
+```{r}
+PW_GLM_flu_mod <- round(head(estimates_cont_rlm(m_PW_f_u)), 2)
+
+  PW_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  PW_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  PW_GLM_flu_mod <- PW_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_PW_gt <- PW_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,003")
+    M_PW_gt
+    
+M_PW_gt%>%
+   gtsave(here("output/tables/main_models/sex_stratif/univariable/rlm", "M_PW_estimates_Flu_in_pregn_and_in_pandemic_gt_F.docx"))
+```
+
+## Table MALES
+```{r}
+PW_GLM_flu_mod <- round(head(estimates_cont_rlm(m_PW_m_u)), 2)
+
+  PW_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  PW_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  PW_GLM_flu_mod <- PW_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_PW_gt <- PW_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,053")
+    M_PW_gt
+    
+M_PW_gt%>%
+    gtsave(here("output/tables/main_models/sex_stratif/univariable/rlm", "M_PW_estimates_Flu_in_pregn_and_in_pandemic_gt_M.docx"))
+```
+
+## Marginally adjusted means FEMALES
+```{r}
+m_PW_a_mmeans_f <- ggemmeans(m_PW_f_u, "Flu_in_pregn_and_in_pandemic")
+a_m_PW_u_f <- mmeans_ci_vertic_cont(m_PW_a_mmeans_f) 
+
+a_m_PW_u_f['outcome'] <- c("placenta weight (g)")
+a_m_PW_u_f['sex'] <- c("females")
+a_m_PW_u_f['flu exp'] <- c("no", "yes")
+a_m_PW_u_f<-a_m_PW_u_f[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+## Marginally adjusted means MALES
+```{r}
+m_PW_a_mmeans_m <- ggemmeans(m_PW_m_u, "Flu_in_pregn_and_in_pandemic")
+a_m_PW_u_m <- mmeans_ci_vertic_cont(m_PW_a_mmeans_m) 
+
+a_m_PW_u_m['outcome'] <- c("placenta weight (g)")
+a_m_PW_u_m['sex'] <- c("males")
+a_m_PW_u_m['flu exp'] <- c("no", "yes")
+a_m_PW_u_m<-a_m_PW_u_m[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+
+# Birth length 
+```{r}
+  m_BL_f_u<- rlm(babylength ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths, subset = (sex=="Female"))
+  summary(m_BL_f_u)
+  nobs(m_BL_f_u)
+  
+  m_BL_m_u<- rlm(babylength ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths, subset = (sex=="Male"))
+  summary(m_BL_m_u)
+  nobs(m_BL_m_u)
+```
+
+## Table FEMALES
+```{r}
+BL_GLM_flu_mod <- round(head(estimates_cont_rlm(m_BL_f_u)), 2)
+
+  BL_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  BL_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  BL_GLM_flu_mod <- BL_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_BL_gt <- BL_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,010")
+    M_BL_gt
+    
+M_BL_gt%>%
+   gtsave(here("output/tables/main_models/sex_stratif/univariable/rlm", "M_BL_estimates_Flu_in_pregn_and_in_pandemic_gt_F.docx"))
+```
+## Table MALES
+```{r}
+BL_GLM_flu_mod <- round(head(estimates_cont_rlm(m_BL_m_u)), 2)
+
+  BL_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  BL_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  BL_GLM_flu_mod <- BL_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_BL_gt <- BL_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,068")
+    M_BL_gt
+    
+M_BL_gt%>%
+    gtsave(here("output/tables/main_models/sex_stratif/univariable/rlm", "M_BL_estimates_Flu_in_pregn_and_in_pandemic_gt_M.docx"))
+```
+
+## Marginally adjusted means FEMALES
+```{r}
+m_BL_a_mmeans_f <- ggemmeans(m_BL_f_u, "Flu_in_pregn_and_in_pandemic")
+a_m_BL_u_f <- mmeans_ci_vertic_cont(m_BL_a_mmeans_f) 
+
+a_m_BL_u_f['outcome'] <- c("birth length (cm)")
+a_m_BL_u_f['sex'] <- c("females")
+a_m_BL_u_f['flu exp'] <- c("no", "yes")
+a_m_BL_u_f<-a_m_BL_u_f[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+## Marginally adjusted means MALES
+```{r}
+m_BL_a_mmeans_m <- ggemmeans(m_BL_m_u, "Flu_in_pregn_and_in_pandemic")
+a_m_BL_u_m <- mmeans_ci_vertic_cont(m_BL_a_mmeans_m) 
+
+a_m_BL_u_m['outcome'] <- c("birth length (cm)")
+a_m_BL_u_m['sex'] <- c("males")
+a_m_BL_u_m['flu exp'] <- c("no", "yes")
+a_m_BL_u_m<-a_m_BL_u_m[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+# PI 
+```{r}
+  m_PI_f_u<- rlm(PI ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths, subset=(sex=="Female"))
+  summary(m_PI_f_u)
+  nobs(m_PI_f_u)
+
+  m_PI_m_u<- rlm(PI ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths, subset=(sex=="Male"))
+  summary(m_PI_m_u)
+  nobs(m_PI_m_u)
+```
+
+## Table FEMALES
+```{r}
+PI_GLM_flu_mod <- round(head(estimates_cont_rlm(m_PI_f_u)), 2)
+
+  PI_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  PI_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  PI_GLM_flu_mod <- PI_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_PI_gt <- PI_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,010")
+    M_PI_gt
+    
+M_PI_gt%>%
+   gtsave(here("output/tables/main_models/sex_stratif/univariable/rlm", "M_PI_estimates_Flu_in_pregn_and_in_pandemic_gt_F.docx"))
+```
+## Table MALES
+```{r}
+PI_GLM_flu_mod <- round(head(estimates_cont_rlm(m_PI_m_u)), 2)
+
+  PI_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  PI_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  PI_GLM_flu_mod <- PI_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_PI_gt <- PI_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,068")
+    M_PI_gt
+    
+M_PI_gt%>%
+    gtsave(here("output/tables/main_models/sex_stratif/univariable/rlm", "M_PI_estimates_Flu_in_pregn_and_in_pandemic_gt_M.docx"))
+```
+
+## Marginally adjusted means FEMALES
+```{r}
+m_PI_a_mmeans_f <- ggemmeans(m_PI_f_u, "Flu_in_pregn_and_in_pandemic")
+a_m_PI_u_f <- mmeans_ci_vertic_cont(m_PI_a_mmeans_f) 
+
+a_m_PI_u_f['outcome'] <- c("ponderal index")
+a_m_PI_u_f['sex'] <- c("females")
+a_m_PI_u_f['flu exp'] <- c("no", "yes")
+a_m_PI_u_f<-a_m_PI_u_f[,c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+## Marginally adjusted means MALES
+```{r}
+m_PI_a_mmeans_m <- ggemmeans(m_PI_m_u, "Flu_in_pregn_and_in_pandemic")
+a_m_PI_u_m <- mmeans_ci_vertic_cont(m_PI_a_mmeans_m) 
+
+a_m_PI_u_m['outcome'] <- c("ponderal index")
+a_m_PI_u_m['sex'] <- c("males")
+a_m_PI_u_m['flu exp'] <- c("no", "yes")
+a_m_PI_u_m<-a_m_PI_u_m[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+# Pooling the tables for predicted means together
+```{r}
+a_m_cont_outc_u_sex <- rbind(a_m_BW_u_f, a_m_BW_u_m, a_m_HC_u_f, a_m_HC_u_m,
+                         a_m_PW_u_f, a_m_PW_u_m, a_m_BL_u_f, a_m_BL_u_m,
+                         a_m_PI_u_f, a_m_PI_u_m, a_m_GA_u_f, a_m_GA_u_m)
+a_m_cont_outc_u_sex <- a_m_cont_outc_u_sex %>%
+  mutate(mean=round(mean, 2),
+         lci=round(lci, 2),
+         uci=round(uci, 2),
+         model="univariable")
+a_m_cont_outc_u_sex%>%
+  gt() %>%
+  gtsave(here("output/tables/main_models/sex_stratif/univariable/rlm", "M_cont_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+# LBW 
+```{r}
+ m_LBW_f_u<- glm(LBW ~ Flu_in_pregn_and_in_pandemic, family = "binomial", data=pandemy_livebirths, subset=(sex=="Female"))
+  summary(m_LBW_f_u)
+  nobs(m_LBW_f_u)
+
+ m_LBW_m_u<- glm(LBW ~ Flu_in_pregn_and_in_pandemic, family = "binomial", data=pandemy_livebirths, subset=(sex=="Male"))
+  summary(m_LBW_m_u)
+  nobs(m_LBW_m_u)
+```
+
+## Table FEMALES
+```{r}
+LBW_GLM3 <- round(head(estimates_binary(m_LBW_f_u)), 2)
+
+  LBW_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  LBW_GLM3['category'] <- c(" ",
+                          "yes")
+  LBW_GLM3<-LBW_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_LBW_gt <- LBW_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,013")
+    M_LBW_gt
+    
+LBW_estimates_gt <- M_LBW_gt%>%
+    gtsave(here("output/tables/main_models/sex_stratif/univariable", "M_LBW_estimates_Flu_in_pregn_and_in_pandemic_gt_F.docx"))
+```
+
+## Table MALES
+```{r}
+LBW_GLM3 <- round(head(estimates_binary(m_LBW_m_u)), 2)
+
+  LBW_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  LBW_GLM3['category'] <- c(" ",
+                          "yes")
+  LBW_GLM3<-LBW_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_LBW_gt <- LBW_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,069")
+    M_LBW_gt
+    
+LBW_estimates_gt <- M_LBW_gt%>%
+    gtsave(here("output/tables/main_models/sex_stratif/univariable", "M_LBW_estimates_Flu_in_pregn_and_in_pandemic_gt_M.docx"))
+```
+
+## Marginal proportions females
+```{r}
+m_LBW_a_mmeans_f <- ggemmeans(m_LBW_f_u, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+a_m_LBW_u_f <- mmeans_ci_vertic_bin(m_LBW_a_mmeans_f) 
+
+a_m_LBW_u_f['outcome'] <- c("LBW (<2,500g)")
+a_m_LBW_u_f['sex'] <- c("females")
+a_m_LBW_u_f['flu exp'] <- c("no", "yes")
+a_m_LBW_u_f<-a_m_LBW_u_f[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+## Marginal proportions males
+```{r}
+m_LBW_a_mmeans_m <- ggemmeans(m_LBW_m_u, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+a_m_LBW_u_m <- mmeans_ci_vertic_bin(m_LBW_a_mmeans_m) 
+
+a_m_LBW_u_m['outcome'] <- c("LBW (<2,500g)")
+a_m_LBW_u_m['sex'] <- c("males")
+a_m_LBW_u_m['flu exp'] <- c("no", "yes")
+a_m_LBW_u_m<-a_m_LBW_u_m[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+# stillbirth 
+```{r}
+ m_SB_f_u<- glm(stillbirth ~ Flu_in_pregn_and_in_pandemic, family = binomial, data=pandemy, subset=(sex=="Female"))
+  summary(m_SB_f_u)
+  nobs(m_SB_f_u)
+
+ m_SB_m_u<- glm(stillbirth ~ Flu_in_pregn_and_in_pandemic, family = binomial, data=pandemy, subset=(sex=="Male"))
+  summary(m_SB_m_u)
+  nobs(m_SB_m_u)
+```
+
+## Table FEMALES
+```{r}
+SB_GLM3 <- round(head(estimates_binary(m_SB_f_u)), 2)
+
+  SB_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  SB_GLM3['category'] <- c(" ",
+                          "yes")
+  SB_GLM3<-SB_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_SB_gt <- SB_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,050")
+    M_SB_gt
+    
+SB_estimates_gt <- M_SB_gt%>%
+    gtsave(here("output/tables/main_models/sex_stratif/univariable", "M_SB_estimates_Flu_in_pregn_and_in_pandemic_gt_F.docx"))
+```
+
+### Table MALES
+```{r}
+SB_GLM3 <- round(head(estimates_binary(m_SB_m_u)), 2)
+
+  SB_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  SB_GLM3['category'] <- c(" ",
+                          "yes")
+  SB_GLM3<-SB_GLM3[, c('Parameters', "category", "OR", "lci","uci", "pvalue")]
+
+   M_SB_gt <- SB_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,122")
+    M_SB_gt
+    
+SB_estimates_gt <- M_SB_gt%>%
+    gtsave(here("output/tables/main_models/sex_stratif/univariable", "M_SB_estimates_Flu_in_pregn_and_in_pandemic_gt_M.docx"))
+```
+
+## Marginal proportions females
+```{r}
+m_SB_a_mmeans_f <- ggemmeans(m_SB_f_u, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+a_m_SB_u_f <- mmeans_ci_vertic_bin(m_SB_a_mmeans_f) 
+
+a_m_SB_u_f['outcome'] <- c("stillbirth")
+a_m_SB_u_f['sex'] <- c("females")
+a_m_SB_u_f['flu exp'] <- c("no", "yes")
+a_m_SB_u_f<-a_m_SB_u_f[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+## Marginal proportions males
+```{r}
+m_SB_a_mmeans_m <- ggemmeans(m_SB_m_u, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+a_m_SB_u_m <- mmeans_ci_vertic_bin(m_SB_a_mmeans_m) 
+
+a_m_SB_u_m['outcome'] <- c("stillbirth")
+a_m_SB_u_m['sex'] <- c("males")
+a_m_SB_u_m['flu exp'] <- c("no", "yes")
+a_m_SB_u_m<-a_m_SB_u_m[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+## PTB 
+```{r}
+ m_PTB_f_u<- glm(PTB_corrected ~ Flu_in_pregn_and_in_pandemic, family = "binomial", data=pandemy_livebirths, subset = (sex=="Female"))
+  summary(m_PTB_f_u)
+  nobs(m_PTB_f_u)
+
+ m_PTB_m_u <- glm(PTB_corrected ~ Flu_in_pregn_and_in_pandemic, family = "binomial", data=pandemy_livebirths, subset = (sex=="Male"))
+  summary(m_PTB_m_u)
+  nobs(m_PTB_m_u)
+```
+
+### Table FEMALES
+```{r}
+PTB_GLM3 <- round(head(estimates_binary(m_PTB_f_u)), 2)
+
+  PTB_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  PTB_GLM3['category'] <- c(" ",
+                          "yes")
+  PTB_GLM3<-PTB_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_PTB_gt <- PTB_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,013")
+    M_PTB_gt
+    
+PTB_estimates_gt <- M_PTB_gt%>%
+   gtsave(here("output/tables/main_models/sex_stratif/univariable", "M_PTB_estimates_Flu_in_pregn_and_in_pandemic_gt_F.docx"))
+```
+
+### Table MALES
+```{r}
+PTB_GLM3 <- round(head(estimates_binary(m_PTB_m_u)), 2)
+
+  PTB_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  PTB_GLM3['category'] <- c(" ",
+                          "yes")
+  PTB_GLM3<-PTB_GLM3[, c('Parameters', "category", "OR", "lci","uci", "pvalue")]
+
+   M_PTB_gt <- PTB_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=1,069")
+    M_PTB_gt
+    
+PTB_estimates_gt <- M_PTB_gt%>%
+    gtsave(here("output/tables/main_models/sex_stratif/univariable", "M_PTB_estimates_Flu_in_pregn_and_in_pandemic_gt_M.docx"))
+```
+
+## Marginal proportions females
+```{r}
+m_PTB_a_mmeans_f <- ggemmeans(m_PTB_f_u, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+a_m_PTB_u_f <- mmeans_ci_vertic_bin(m_PTB_a_mmeans_f) 
+
+a_m_PTB_u_f['outcome'] <- c("PTB (<37 weeks)")
+a_m_PTB_u_f['sex'] <- c("females")
+a_m_PTB_u_f['flu exp'] <- c("no", "yes")
+a_m_PTB_u_f<-a_m_PTB_u_f[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+## Marginal proportions males
+```{r}
+m_PTB_a_mmeans_m <- ggemmeans(m_PTB_m_u, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+a_m_PTB_u_m <- mmeans_ci_vertic_bin(m_PTB_a_mmeans_m) 
+
+a_m_PTB_u_m['outcome'] <- c("PTB (<37 weeks)")
+a_m_PTB_u_m['sex'] <- c("males")
+a_m_PTB_u_m['flu exp'] <- c("no", "yes")
+a_m_PTB_u_m<-a_m_PTB_u_m[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+
+## Neonat mortality
+```{r}
+ m_NM_f_u<- glm(neonat_mort_d1_d5 ~ Flu_in_pregn_and_in_pandemic, family = "binomial", data=pandemy_livebirths, subset=(sex=="Female"))
+  summary(m_NM_f_u)
+  nobs(m_NM_f_u)
+
+m_NM_m_u<- glm(neonat_mort_d1_d5 ~ Flu_in_pregn_and_in_pandemic, family = "binomial", data=pandemy_livebirths, subset=(sex=="Male"))
+  summary(m_NM_m_u)
+  nobs(m_NM_m_u)
+```
+
+### Table FEMALES
+```{r}
+NM_GLM3 <- round(head(estimates_binary(m_NM_f_u)), 2)
+
+  NM_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  NM_GLM3['category'] <- c(" ",
+                          "yes")
+  NM_GLM3<-NM_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_NM_gt <- NM_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  )%>%
+     tab_source_note(source_note = "n=1,012")
+    M_NM_gt
+    
+NM_estimates_gt <- M_NM_gt%>%
+    gtsave(here("output/tables/main_models/sex_stratif/univariable", "M_NM_estimates_Flu_in_pregn_and_in_pandemic_gt_F.docx"))
+```
+
+### Table MALES
+```{r}
+NM_GLM3 <- round(head(estimates_binary(m_NM_m_u)), 2)
+
+  NM_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  NM_GLM3['category'] <- c(" ",
+                          "yes")
+  NM_GLM3<-NM_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_NM_gt <- NM_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  )%>%
+     tab_source_note(source_note = "n=1,069")
+    M_NM_gt
+    
+NM_estimates_gt <- M_NM_gt%>%
+   gtsave(here("output/tables/main_models/sex_stratif/univariable", "M_NM_estimates_Flu_in_pregn_and_in_pandemic_gt_M.docx"))
+```
+
+## Marginal proportions females
+```{r}
+m_NM_a_mmeans_f <- ggemmeans(m_NM_f_u, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+a_m_NM_u_f <- mmeans_ci_vertic_bin(m_NM_a_mmeans_f) 
+
+a_m_NM_u_f['outcome'] <- c("early neonatal mortality")
+a_m_NM_u_f['sex'] <- c("females")
+a_m_NM_u_f['flu exp'] <- c("no", "yes")
+a_m_NM_u_f<-a_m_NM_u_f[,c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+## Marginal proportions males
+```{r}
+m_NM_a_mmeans_m <- ggemmeans(m_NM_m_u, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+a_m_NM_u_m <- mmeans_ci_vertic_bin(m_NM_a_mmeans_m) 
+
+a_m_NM_u_m['outcome'] <- c("early neonatal mortality")
+a_m_NM_u_m['sex'] <- c("males")
+a_m_NM_u_m['flu exp'] <- c("no", "yes")
+a_m_NM_u_m<-a_m_NM_u_m[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff", "sex")]
+```
+
+
+
+# Pooling the tables for marginal proportions
+```{r}
+a_m_bin_outc_u_sex <- rbind(a_m_LBW_u_f, a_m_LBW_u_m, a_m_PTB_u_f, a_m_PTB_u_m,
+                         a_m_SB_u_f, a_m_SB_u_m, a_m_NM_u_f,a_m_NM_u_m)
+a_m_bin_outc_u_sex <- a_m_bin_outc_u_sex %>%
+  mutate(mean=round(mean, 4),
+         lci=round(lci, 4),
+         uci=round(uci, 4),
+         model="univariable")
+a_m_bin_outc_u_sex%>%
+  gt() %>%
+  gtsave(here("output/tables/main_models/sex_stratif/univariable", "M_bin_marg_prop_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```

@@ -1,0 +1,519 @@
+---
+title: "Univariable models"
+author: "Mathilde Le Vu"
+date: "2024-03-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Exclusions
+Between 1905 and 1924, there are `r dim(laus1.1)[1]` births included in our database.
+
+From this, we successively excluded:
+
+- Home births n= `r sum(laus1.1$Homebirth2 == "yes")`,
+`r round(100 * (sum(!is.na(laus1.1$Homebirth2) & laus1.1$Homebirth2 == "yes") / sum(!is.na(laus1.1$Homebirth2))), digits = 2)[1]` %. New Number of cases: `r dim(laus1.2)[1]`
+
+- Gestational age (based on variables GA_weeks) <22 (to fit today definitions of stillbirth), or birthweight <500g. 
+n= `r (dim(laus1.2)-dim(laus1.3))[1]`, `r round(100 * (dim(laus1.2) -dim(laus1.3))/dim(laus1.2), digits = 2)[1]`.
+New Number of cases: `r dim(laus1.3)[1]`
+
+- "Extreme outliers" for birthweight and head circumference based on Z-scores adjusted for sex. I have chosen the threshold of 7 Z score. We then excluded
+n= `r (dim(laus1.3)-dim(laus2))[1]`, `r round(100 * (dim(laus1.3) -dim(laus2))/dim(laus1.3), digits = 2)[1]`.
+New Number of cases: `r dim(laus2)[1]`
+
+## Gestational age 
+```{r}
+  m_GA_u<- rlm(GA_weeks_corrected ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths)
+  summary(m_GA_u)
+  nobs(m_GA_u)
+```
+
+### Table
+```{r}
+GA_GLM_flu_mod <- round(head(estimates_cont_rlm(m_GA_u)), 2)
+# GA_GLMmod <- GA_GLM_flu_mod %>%
+# mutate(pvalue=as.numeric(pvalue)) %>%
+# mutate(pvalue1=pvalue) 
+# GA_GLMmod$pvalue <-  format(round(GA_GLMmod$pvalue, digits=2), nsmall=2)
+# GA_GLMmod <- GA_GLMmod%>% 
+#     mutate(pvalue1=case_when((pvalue1<0.0001)~ "<0.0001",
+#                              (pvalue1<0.001)~ "<0.001")) 
+# GA_GLMmod$pvalue1 <- (ifelse(is.na(GA_GLMmod$pvalue1), GA_GLMmod$pvalue,  GA_GLMmod$pvalue1))
+# GA_GLMmod <- GA_GLMmod %>%
+#   select(-one_of('pvalue'))  
+# GA_GLM3 <- GA_GLMmod %>%
+# rename(pvalue=pvalue1) %>%
+#     mutate_if(is.numeric, ~ format(round(., digits = 2), nsmall = 2))
+
+  GA_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  GA_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  GA_GLM_flu_mod<-GA_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_GA_gt <- GA_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,085")
+   M_GA_gt
+
+M_GA_gt%>%
+  gtsave(here("output/tables/main_models/univariable/rlm", "M_GA_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+### Marginally adjusted means
+```{r}
+m_GA_a_mmeans <- ggemmeans(m_GA_u, "Flu_in_pregn_and_in_pandemic")
+m_GA_a_mmeans <- mmeans_ci_vertic_cont(m_GA_a_mmeans) 
+
+
+ m_GA_a_mmeans['outcome'] <- c("gestational age (weeks)")
+  m_GA_a_mmeans['flu exp'] <- c("no", "yes")
+   m_GA_a_mmeans<-m_GA_a_mmeans[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+## Birthweight 
+```{r}
+  m_BW_u<- rlm(birthweight ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths)
+  summary(m_BW_u)
+  nobs(m_BW_u)
+```
+
+### Table
+```{r}
+BW_GLM_flu_mod <- round(head(estimates_cont_rlm(m_BW_u)), 2)
+
+  BW_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  BW_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  BW_GLM_flu_mod<-BW_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_BW_gt <- BW_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,085")
+    M_BW_gt
+
+M_BW_gt%>%
+  gtsave(here("output/tables/main_models/univariable/rlm", "M_BW_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+### Marginally adjusted means
+```{r}
+m_BW_a_mmeans <- ggemmeans(m_BW_u, "Flu_in_pregn_and_in_pandemic")
+m_BW_a_mmeans <- mmeans_ci_vertic_cont(m_BW_a_mmeans) 
+
+ m_BW_a_mmeans['outcome'] <- c("birth weight (g)")
+    m_BW_a_mmeans['flu exp'] <- c("no", "yes")
+ m_BW_a_mmeans<-m_BW_a_mmeans[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+## Head circumference 
+```{r}
+  m_HC_u<- rlm(head_circ ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths)
+summary(m_HC_u)
+nobs(m_HC_u)
+```
+### Table
+```{r}
+HC_GLM_flu_mod <- round(head(estimates_cont_rlm(m_HC_u)), 2)
+
+  HC_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  HC_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  HC_GLM_flu_mod <- HC_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_HC_gt <- HC_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,077")
+    M_HC_gt
+    
+M_HC_gt%>%
+  gtsave(here("output/tables/main_models/univariable/rlm", "M_HC_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+
+### Marginally adjusted means
+```{r}
+m_HC_a_mmeans <- ggemmeans(m_HC_u, "Flu_in_pregn_and_in_pandemic")
+m_HC_a_mmeans <- mmeans_ci_vertic_cont(m_HC_a_mmeans) 
+
+ m_HC_a_mmeans['outcome'] <- c("head circumference (cm)")
+  m_HC_a_mmeans['flu exp'] <- c("no", "yes")
+ m_HC_a_mmeans<-m_HC_a_mmeans[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+## Placenta weight 
+```{r}
+  m_PW_u<- rlm(placentaweight ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths)
+  summary(m_PW_u)
+  nobs(m_PW_u)
+```
+
+### Table
+```{r}
+PW_GLM_flu_mod <- round(head(estimates_cont_rlm(m_PW_u)), 2)
+
+  PW_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  PW_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  PW_GLM_flu_mod <- PW_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_PW_gt <- PW_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,059")
+    M_PW_gt
+    
+M_PW_gt%>%
+  gtsave(here("output/tables/main_models/univariable/rlm", "M_PW_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+### Marginally adjusted means
+```{r}
+m_PW_a_mmeans <- ggemmeans(m_PW_u, "Flu_in_pregn_and_in_pandemic")
+m_PW_a_mmeans <- mmeans_ci_vertic_cont(m_PW_a_mmeans) 
+
+ m_PW_a_mmeans['outcome'] <- c("placenta weight (g)")
+   m_PW_a_mmeans['flu exp'] <- c("no", "yes")
+  m_PW_a_mmeans<-m_PW_a_mmeans[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+
+## Birth length 
+```{r}
+  m_BL_u<- rlm(babylength ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths)
+  summary(m_BL_u)
+  nobs(m_BL_u)
+```
+### Table
+```{r}
+BL_GLM_flu_mod <- round(head(estimates_cont_rlm(m_BL_u)), 2)
+
+
+  BL_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  BL_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  BL_GLM_flu_mod <- BL_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_BL_gt <- BL_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,081")
+    M_BL_gt
+    
+M_BL_gt%>%
+  gtsave(here("output/tables/main_models/univariable/rlm", "M_BL_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+### Marginally adjusted means
+```{r}
+m_BL_a_mmeans <- ggemmeans(m_BL_u, "Flu_in_pregn_and_in_pandemic")
+m_BL_a_mmeans <- mmeans_ci_vertic_cont(m_BL_a_mmeans) 
+
+ m_BL_a_mmeans['outcome'] <- c("birth length (cm)")
+   m_BL_a_mmeans['flu exp'] <- c("no", "yes")
+   m_BL_a_mmeans<-m_BL_a_mmeans[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+
+## PI 
+```{r}
+  m_PI_u<- rlm(PI ~ Flu_in_pregn_and_in_pandemic, data=pandemy_livebirths)
+  summary(m_PI_u)
+  nobs(m_PI_u)
+```
+
+### Table
+```{r}
+PI_GLM_flu_mod <- round(head(estimates_cont_rlm(m_PI_u)), 2)
+
+  PI_GLM_flu_mod['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  PI_GLM_flu_mod['category'] <- c(" ",
+                          "yes")
+  PI_GLM_flu_mod <- PI_GLM_flu_mod[, c('Parameters', "category", "beta", "lci","uci")]
+
+   M_PI_gt <- PI_GLM_flu_mod %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,081")
+    M_PI_gt
+    
+M_PI_gt%>%
+  gtsave(here("output/tables/main_models/univariable/rlm", "M_PI_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+### Marginally adjusted means
+```{r}
+m_PI_a_mmeans <- ggemmeans(m_PI_u, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+m_PI_a_mmeans <- mmeans_ci_vertic_cont(m_PI_a_mmeans) 
+
+ m_PI_a_mmeans['outcome'] <- c("ponderal index")
+    m_PI_a_mmeans['flu exp'] <- c("no", "yes")
+  m_PI_a_mmeans<-m_PI_a_mmeans[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+# Pooling the tables for predicted means together
+```{r}
+a_m_cont_outc_u <- rbind(m_BW_a_mmeans, m_HC_a_mmeans,
+                         m_PW_a_mmeans, m_BL_a_mmeans,
+                         m_PI_a_mmeans,m_GA_a_mmeans)
+a_m_cont_outc_u <- a_m_cont_outc_u %>%
+  mutate(mean=round(mean, 2),
+         lci=round(lci, 2),
+         uci=round(uci, 2),
+         sex="all",
+         model="univariable")
+a_m_cont_outc_u%>%
+  gt() %>%
+  gtsave(here("output/tables/main_models/univariable/rlm", "M_cont_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+
+# GLM: binary outcomes 
+
+## LBW 
+```{r}
+ m_LBW_u<- glm(LBW ~ Flu_in_pregn_and_in_pandemic, family = "binomial", data=pandemy_livebirths)
+  summary(m_LBW_u)
+  nobs(m_LBW_u)
+```
+
+### Table
+```{r}
+LBW_GLM3 <- round(head(estimates_binary(m_LBW_u)), 2)
+
+  LBW_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  LBW_GLM3['category'] <- c(" ",
+                          "yes")
+  LBW_GLM3<-LBW_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_LBW_gt <- LBW_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,085")
+    M_LBW_gt
+    
+LBW_estimates_gt <- M_LBW_gt%>%
+  gtsave(here("output/tables/main_models/univariable", "M_LBW_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+### Marginal proportions
+```{r}
+m_LBW_a_mmeans_u <- ggemmeans(m_LBW_u, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+m_LBW_a_mmeans_u <- mmeans_ci_vertic_bin(m_LBW_a_mmeans_u) 
+
+ m_LBW_a_mmeans_u['outcome'] <- c("LBW (<2,500g)")
+ m_LBW_a_mmeans_u['flu exp'] <- c("no", "yes")
+  m_LBW_a_mmeans_u<-m_LBW_a_mmeans_u[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+
+## stillbirth 
+```{r}
+ m_SB_u<- glm(stillbirth ~ Flu_in_pregn_and_in_pandemic, family = binomial, data=pandemy)
+  summary(m_SB_u)
+  nobs(m_SB_u)
+```
+
+### Table
+```{r}
+SB_GLM3 <- round(head(estimates_binary(m_SB_u)), 2)
+
+  SB_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  SB_GLM3['category'] <- c(" ",
+                          "yes")
+  SB_GLM3<-SB_GLM3[, c('Parameters', "category", "OR", "lci","uci", "pvalue")]
+
+   M_SB_gt <- SB_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,177")
+    M_SB_gt
+    
+SB_estimates_gt <- M_SB_gt%>%
+  gtsave(here("output/tables/main_models/univariable", "M_SB_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+### Marginal proportions
+```{r}
+m_SB_a_mmeans_u <- ggemmeans(m_SB_u, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+m_SB_a_mmeans_u <- mmeans_ci_vertic_bin(m_SB_a_mmeans_u) 
+
+ m_SB_a_mmeans_u['outcome'] <- c("stillbirth")
+  m_SB_a_mmeans_u['flu exp'] <- c("no", "yes")
+
+  m_SB_a_mmeans_u<-m_SB_a_mmeans_u[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+## PTB 
+```{r}
+ m_PTB_u<- glm(PTB_corrected ~ Flu_in_pregn_and_in_pandemic, family = "binomial", data=pandemy_livebirths)
+  summary(m_PTB_u)
+  nobs(m_PTB_u)
+```
+### Table
+```{r}
+PTB_GLM3 <- round(head(estimates_binary(m_PTB_u)), 2)
+
+  PTB_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  PTB_GLM3['category'] <- c(" ",
+                          "yes")
+  PTB_GLM3<-PTB_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_PTB_gt <- PTB_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  ) %>%
+     tab_source_note(source_note = "n=2,085")
+    M_PTB_gt
+    
+PTB_estimates_gt <- M_PTB_gt%>%
+  gtsave(here("output/tables/main_models/univariable", "M_PTB_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+### Marginal proportions
+```{r}
+m_PTB_a_mmeans_u <- ggemmeans(m_PTB_u, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+m_PTB_a_mmeans_u <- mmeans_ci_vertic_bin(m_PTB_a_mmeans_u) 
+
+ m_PTB_a_mmeans_u['outcome'] <- c("PTB (<37 weeks)")
+  m_PTB_a_mmeans_u['flu exp'] <- c("no", "yes")
+
+  m_PTB_a_mmeans_u<-m_PTB_a_mmeans_u[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+
+## Neonat mortality
+```{r}
+ m_NM_u<- glm(neonat_mort_d1_d5 ~ Flu_in_pregn_and_in_pandemic, family = "binomial", data=pandemy_livebirths)
+  summary(m_NM_u)
+  nobs(m_NM_u)
+```
+
+### Table
+```{r}
+NM_GLM3 <- round(head(estimates_binary(m_NM_u)), 2)
+
+  NM_GLM3['Parameters'] <- c("intercept", 
+                            "Flu during pregnancy (ref: no)"
+                            )
+  NM_GLM3['category'] <- c(" ",
+                          "yes")
+  NM_GLM3<-NM_GLM3[, c('Parameters', "category", "OR", "lci","uci")]
+
+   M_NM_gt <- NM_GLM3 %>%
+      gt()%>%
+      tab_spanner(label = "95% CI", columns = c(lci, uci),
+                  ) %>%
+  tab_options(table.width = pct(18), data_row.padding = px(2),   table.font.size = 12,
+              column_labels.font.weight = "bold",  row_group.font.weight  = "bold",
+              heading.title.font.size = 14, heading.subtitle.font.size = 14
+  )%>%
+     tab_source_note(source_note = "n=2,084")
+    M_NM_gt
+    
+NM_estimates_gt <- M_NM_gt%>%
+  gtsave(here("output/tables/main_models/univariable", "M_NM_estimates_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+### Marginal proportions
+```{r}
+m_NM_a_mmeans_u <- ggemmeans(m_NM_u, "Flu_in_pregn_and_in_pandemic", margin="marginalmeans")
+m_NM_a_mmeans_u <- mmeans_ci_vertic_bin(m_NM_a_mmeans_u) 
+
+ m_NM_a_mmeans_u['outcome'] <- c("early neonatal mortality")
+  m_NM_a_mmeans_u['flu exp'] <- c("no", "yes")
+ m_NM_a_mmeans_u<-m_NM_a_mmeans_u[, c("outcome",'flu exp', "mean","lci", "uci", 
+                                    "d", "lower_diff", "upper_diff")]
+```
+
+
+# Pooling the tables for marginal proportions
+```{r}
+a_m_bin_outc_u <- rbind(m_LBW_a_mmeans_u,m_PTB_a_mmeans_u,
+                        m_SB_a_mmeans_u,m_NM_a_mmeans_u)
+a_m_bin_outc_u <- a_m_bin_outc_u %>%
+  mutate(sex="all",
+         model="univariable")
+a_m_bin_outc_u%>%
+  gt() %>%
+  gtsave(here("output/tables/main_models/univariable", "M_bin_marg_prop_Flu_in_pregn_and_in_pandemic_gt.docx"))
+```
+
+
